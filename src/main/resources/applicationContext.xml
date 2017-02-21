@@ -1,0 +1,52 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+	<import resource="daos.xml" />
+	<import resource="services.xml" />
+	<!-- Configure the scheduler -->
+	<context:component-scan base-package="com.la" />
+	<task:annotation-driven scheduler="myScheduler" />
+	<task:scheduler id="myScheduler" pool-size="100" />
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="java:comp/env/jdbc/LAVUDB" />
+	</bean>
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.current_session_context_class">thread</prop>
+				<prop key="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory
+				</prop>
+				<prop key="hibernate.connection.release_mode">after_statement</prop>
+			</props>
+		</property>
+		<property name="packagesToScan">
+			<list>
+				<value>com.la.lavu.entity</value>
+			</list>
+		</property>
+	</bean>
+	<!-- Transaction services -->
+
+	<bean id="txManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+
+		<property name="location">
+			<value>file:///D:/pase.properties</value>
+			<!-- <value>file:///home/ubuntu/aldrich/crawling_status/pase.properties</value> -->
+			<!-- <value>file:///home/test/softwares/pase.properties</value> -->
+		</property>
+	</bean>
+</beans>
